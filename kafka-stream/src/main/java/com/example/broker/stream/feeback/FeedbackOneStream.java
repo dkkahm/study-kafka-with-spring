@@ -28,12 +28,20 @@ public class FeedbackOneStream {
         var feedbackStreams = sourceStream.flatMap(splitWords()).branch(isGoodWord(), isBadWord());
 
         var feedbackGoodCountStream = feedbackStreams[0].through("t.commodity.feedback-good").groupByKey().count().toStream();
-        feedbackGoodCountStream.print(Printed.<String, Long>toSysOut().withLabel("Good"));
+//        feedbackGoodCountStream.print(Printed.<String, Long>toSysOut().withLabel("Good"));
         feedbackGoodCountStream.to("t.commodity.feedback.good-count");
 
         KStream<String, Long> feedbackBadCountStream = feedbackStreams[1].through("t.commodity.feedback-bad").groupByKey().count().toStream();
-        feedbackBadCountStream.print(Printed.<String, Long>toSysOut().withLabel("Bad"));
+//        feedbackBadCountStream.print(Printed.<String, Long>toSysOut().withLabel("Bad"));
         feedbackBadCountStream.to("t.commodity.feedback.bad-count");
+
+        var feedbackGoodWordCount = feedbackStreams[0].groupBy((key, value) -> value).count().toStream();
+        feedbackGoodWordCount.print(Printed.<String, Long>toSysOut().withLabel("Good"));
+        feedbackGoodWordCount.to("t.commodity.feedback-good-count-word");
+
+        var feedbackBadWordCount = feedbackStreams[1].groupBy((key, value) -> value).count().toStream();
+        feedbackBadWordCount.print(Printed.<String, Long>toSysOut().withLabel("Bad"));
+        feedbackBadWordCount.to("t.commodity.feedback-bad-count-word");
 
         return sourceStream;
     }
