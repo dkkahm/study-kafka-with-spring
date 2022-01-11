@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Configuration
+//@Configuration
 public class FeedbackOneStream {
 
     private static final Set<String> GOOD_WORDS = Set.of("happy", "good", "helpful");
