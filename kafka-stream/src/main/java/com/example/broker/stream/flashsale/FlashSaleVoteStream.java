@@ -12,6 +12,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 @Configuration
 public class FlashSaleVoteStream {
 
@@ -20,8 +24,13 @@ public class FlashSaleVoteStream {
         var stringSerde = Serdes.String();
         var flashSaleVoteSerde = new JsonSerde<>(FlashSaleVoteMessage.class);
 
+        var voteStart = LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0));
+        var voteEnd = LocalDateTime.of(LocalDate.now(), LocalTime.of(10, 0));
+
         var flashSaleVoteStream = builder.stream("t.commodity.flashsale-vote",
                 Consumed.with(stringSerde, flashSaleVoteSerde))
+                .transformValues(() -> new FlashSaleVoteValueTransformer(voteStart, voteEnd))
+                .filter((key, value) -> value != null)
                 .map((key, value) -> KeyValue.pair(value.getCustomerId(), value.getItemName()));
         flashSaleVoteStream.print(Printed.<String, String>toSysOut().withLabel("FlashSalveVoteUserItem"));
         flashSaleVoteStream.to("t.commodity.flashsale-vote-user-item");
