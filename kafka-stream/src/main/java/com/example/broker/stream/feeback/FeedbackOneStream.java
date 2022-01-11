@@ -27,13 +27,11 @@ public class FeedbackOneStream {
         var sourceStream = builder.stream("t.commodity.feedback", Consumed.with(stringSerde, feedbackSerde));
         var feedbackStreams = sourceStream.flatMap(splitWords()).branch(isGoodWord(), isBadWord());
 
-        feedbackStreams[0].to("t.commodity.feedback-good");
-        KStream<String, Long> feedbackGoodCountStream = feedbackStreams[0].groupByKey().count().toStream();
+        var feedbackGoodCountStream = feedbackStreams[0].through("t.commodity.feedback-good").groupByKey().count().toStream();
         feedbackGoodCountStream.print(Printed.<String, Long>toSysOut().withLabel("Good"));
         feedbackGoodCountStream.to("t.commodity.feedback.good-count");
 
-        feedbackStreams[1].to("t.commodity.feedback-bad");
-        KStream<String, Long> feedbackBadCountStream = feedbackStreams[1].groupByKey().count().toStream();
+        KStream<String, Long> feedbackBadCountStream = feedbackStreams[1].through("t.commodity.feedback-bad").groupByKey().count().toStream();
         feedbackBadCountStream.print(Printed.<String, Long>toSysOut().withLabel("Bad"));
         feedbackBadCountStream.to("t.commodity.feedback.bad-count");
 
