@@ -1,0 +1,20 @@
+spring:
+  main:
+    banner-mode: OFF
+  kafka:
+    listener:
+      missing-topics-fatal: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#    consumer:
+#      group-id: stream-group
+#      bootstrap-servers:
+#        - localhost:9092
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+#      properties:
+#        spring:
+#          json:
+#            trusted:
+#              packages: com.example.broker.message
