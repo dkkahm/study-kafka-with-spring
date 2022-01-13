@@ -7,6 +7,7 @@ import org.apache.kafka.streams.kstream.ValueTransformer;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class FeedbackTransformer implements ValueTransformer<FeedbackMessage, FeedbackRatingMessage> {
@@ -32,23 +33,32 @@ public class FeedbackTransformer implements ValueTransformer<FeedbackMessage, Fe
     public FeedbackRatingMessage transform(FeedbackMessage feedbackMessage) {
         var storeValue = Optional.ofNullable(ratingStateStore.get(feedbackMessage.getLocation()))
                 .orElse(new FeedbackRatingStoreValue());
+        var ratingMap = storeValue.getRatingMap();
 
-        // update new store
-        var newSumRating = storeValue.getSumRating() + feedbackMessage.getRating();
-        storeValue.setSumRating(newSumRating);
-        var newCountRating = storeValue.getCountRating() + 1;
-        storeValue.setCountRating(newCountRating);
-
-        // put new store to state store
+        var currentRatingCount = Optional.ofNullable(ratingMap.get(feedbackMessage.getRating())).orElse(0L);
+        var newRatingCount = currentRatingCount + 1;
+        ratingMap.put(feedbackMessage.getRating(), newRatingCount);
         ratingStateStore.put(feedbackMessage.getLocation(), storeValue);
 
         // build branch rating
         var branchRating = new FeedbackRatingMessage();
         branchRating.setLocation(feedbackMessage.getLocation());
-        double averageRating = Math.round((double) newSumRating / newCountRating * 10d) / 10d;
-        branchRating.setAverageRating(averageRating);
+        branchRating.setRatingMap(ratingMap);
+        branchRating.setAverageRating(calculateAverage(ratingMap));
 
         return branchRating;
+    }
+
+    private double calculateAverage(Map<Integer, Long> ratingMap) {
+        var sumRating = 0L;
+        var countRating = 0L;
+
+        for(var entry : ratingMap.entrySet()) {
+            sumRating += entry.getKey() * entry.getValue();
+            countRating += entry.getValue();
+        }
+
+        return Math.round((double) sumRating / countRating * 10d) / 10d;
     }
 
     @Override
