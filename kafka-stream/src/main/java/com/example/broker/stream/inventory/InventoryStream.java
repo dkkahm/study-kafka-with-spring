@@ -11,7 +11,7 @@ import org.springframework.kafka.support.serializer.JsonSerde;
 
 import java.time.Duration;
 
-@Configuration
+//@Configuration
 public class InventoryStream {
 
     @Bean
