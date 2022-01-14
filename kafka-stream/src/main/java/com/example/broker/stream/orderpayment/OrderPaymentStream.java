@@ -39,14 +39,19 @@ public class OrderPaymentStream {
     private OnlineOrderPaymentMessage joinOrderPayment(OnlineOrderMessage order, OnlinePaymentMessage payment) {
         var result = new OnlineOrderPaymentMessage();
 
-        result.setOnlineOrderNumber(order.getOnlineOrderNumber());
-        result.setOrderDateTime(order.getOrderDateTime());
-        result.setTotalAmount(order.getTotalAmount());
-        result.setUsername(order.getUsername());
+        if(order != null) {
+            result.setOnlineOrderNumber(order.getOnlineOrderNumber());
+            result.setOrderDateTime(order.getOrderDateTime());
+            result.setTotalAmount(order.getTotalAmount());
+            result.setUsername(order.getUsername());
+        }
 
-        result.setPaymentDateTime(payment.getPaymentDateTime());
-        result.setPaymentMethod(payment.getPaymentMethod());
-        result.setPaymentNumber(payment.getPaymentNumber());
+        if(payment != null) {
+            result.setOnlineOrderNumber(payment.getOnlineOrderNumber());
+            result.setPaymentDateTime(payment.getPaymentDateTime());
+            result.setPaymentMethod(payment.getPaymentMethod());
+            result.setPaymentNumber(payment.getPaymentNumber());
+        }
 
         return result;
     }
