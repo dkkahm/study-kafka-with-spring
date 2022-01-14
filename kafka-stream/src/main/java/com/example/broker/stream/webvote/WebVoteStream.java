@@ -25,15 +25,13 @@ public class WebVoteStream {
         var colorStream = builder.stream("t.commodity.web.vote.color", Consumed.with(stringSerde, colorSerde))
                 .mapValues(v -> v.getColor());
         colorStream.print(Printed.<String, String>toSysOut().withLabel("Color"));
-        colorStream.to("t.commodity.web.vote.username-color");
-        var colorTable = builder.table("t.commodity.web.vote.username-color", Consumed.with(stringSerde, stringSerde));
+        var colorTable = colorStream.toTable();
 
         // layout
         var layoutStream = builder.stream("t.commodity.web.vote.layout", Consumed.with(stringSerde, layoutSerde))
                 .mapValues(v -> v.getLayout());
         layoutStream.print(Printed.<String, String>toSysOut().withLabel("Layout"));
-        layoutStream.to("t.commodity.web.vote.username-layout");
-        var layoutTable = builder.table("t.commodity.web.vote.username-layout", Consumed.with(stringSerde, stringSerde));
+        var layoutTable = layoutStream.toTable();
 
         // join
         var joinTable = colorTable.join(layoutTable, this::voteJoiner, Materialized.with(stringSerde, designSerde));
