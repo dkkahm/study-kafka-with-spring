@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
+import java.time.Duration;
+
 @Configuration
 public class InventoryStream {
 
@@ -17,6 +19,11 @@ public class InventoryStream {
         var stringSerde = Serdes.String();
         var inventorySerde = new JsonSerde<>(InventoryMessage.class);
         var longSerde = Serdes.Long();
+
+        var windowLength = Duration.ofMinutes(1);
+        var hopLength = Duration.ofSeconds(20);
+        var windowSerde = WindowedSerdes.timeWindowedSerdeFrom(String.class, windowLength.toMillis());
+
         var inventoryTimestampExtractor = new InventoryTimestampExtractor();
 
         var inventoryStream = builder.stream("t.commodity.inventory",
@@ -26,13 +33,12 @@ public class InventoryStream {
         var inventoryTotalStream = inventoryStream
                 .mapValues((k, v) -> v.getType().equalsIgnoreCase("ADD") ? v.getQuantity() : -1 * v.getQuantity())
                 .groupByKey()
-                .aggregate(() -> 0L,
-                        (aggKey, newValue, aggValue) -> aggValue + newValue,
-                        Materialized.with(stringSerde, longSerde)
-                )
+                .windowedBy(TimeWindows.of(windowLength).advanceBy(hopLength))
+                .reduce(Long::sum, Materialized.with(stringSerde, longSerde))
                 .toStream();
-        inventoryTotalStream.print(Printed.<String, Long>toSysOut().withLabel("InventoryTotal"));
-        inventoryTotalStream.to("t.commodity.inventory-total");
+
+        inventoryTotalStream.through("t.commodity.inventory-total", Produced.with(windowSerde, longSerde))
+                .print(Printed.toSysOut());
 
         return inventoryStream;
     }
