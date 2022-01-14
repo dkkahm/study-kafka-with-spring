@@ -11,8 +11,16 @@ public class InventoryAction {
     @Autowired
     private InventoryProducer producer;
 
-    public void publishToKafka(InventoryRequest request) {
+    public void addInventory(InventoryRequest request) {
         var message = new InventoryMessage(request);
+        message.setType("ADD");
+
+        producer.publish(message);
+    }
+
+    public void removeInventory(InventoryRequest request) {
+        var message = new InventoryMessage(request);
+        message.setType("REMOVE");
 
         producer.publish(message);
     }

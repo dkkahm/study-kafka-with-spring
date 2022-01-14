@@ -17,6 +17,7 @@ public class InventoryMessage {
     private String location;
     private String item;
     private long quantity;
+    private String type;
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime transactionTime;

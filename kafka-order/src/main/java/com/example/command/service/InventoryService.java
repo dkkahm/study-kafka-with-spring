@@ -10,7 +10,11 @@ public class InventoryService {
     @Autowired
     private InventoryAction action;
 
-    public void publishInventory(InventoryRequest request) {
-        action.publishToKafka(request);
+    public void addInventory(InventoryRequest request) {
+        action.addInventory(request);
+    }
+
+    public void removeInventory(InventoryRequest request) {
+        action.removeInventory(request);
     }
 }

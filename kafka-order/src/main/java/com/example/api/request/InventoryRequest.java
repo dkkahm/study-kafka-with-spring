@@ -17,7 +17,6 @@ public class InventoryRequest {
     private String location;
     private String item;
     private long quantity;
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+//    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime transactionTime;
 }
