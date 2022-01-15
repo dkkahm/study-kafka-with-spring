@@ -1,25 +1,25 @@
 package com.example.avro.scheduler;
 
-import com.example.avro.data.Avro01;
-import com.example.avro.producer.Avro01Producer;
+import com.example.avro.data.Hello;
+import com.example.avro.producer.HelloProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
-public class Avro01Scheduler {
+public class HelloScheduler {
 
     @Autowired
-    private Avro01Producer producer;
+    private HelloProducer producer;
 
     @Scheduled(fixedRate = 1000)
     public void publishSchedule() {
-        var data = Avro01.newBuilder()
-                .setFullName("Fullname - " + ThreadLocalRandom.current().nextInt())
-                .setMaritalStatus("SINGLE")
-                .setActive(true)
+        var data = Hello.newBuilder()
+                .setMyIntField(ThreadLocalRandom.current().nextInt())
+                .setMyStringField("Now is " + LocalTime.now())
                 .build();
 
         producer.send(data);
