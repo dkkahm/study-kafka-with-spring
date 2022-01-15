@@ -7,7 +7,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Slf4j
-@Service
+//@Service
 public class Avro01Consumer {
 
     @KafkaListener(topics = "sc-avro01")
