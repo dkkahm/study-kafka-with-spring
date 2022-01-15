@@ -71,12 +71,12 @@ services:
     image: confluentinc/cp-kafka-rest:5.5.7
     hostname: kafka-rest-proxy
     ports:
-      - "8082:8082"
+      - 8082:8082
     environment:
       # Specifies the ZooKeeper connection string. This service connects
       # to ZooKeeper so that it can broadcast its endpoints as well as
       # react to the dynamic topology of the Kafka cluster.
-      KAFKA_REST_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_REST_ZOOKEEPER_CONNECT: zookeeper0:2181
       # The address on which Kafka REST will listen for API requests.
       KAFKA_REST_LISTENERS: http://0.0.0.0:8082/
       # The base URL for Schema Registry that should be used by the Avro serializer.
@@ -94,6 +94,26 @@ services:
     # before attempting to start Kafka REST.
     depends_on:
       - zookeeper0
+      - kafka0
+      - schemaregistry0
+
+  akhq:
+    image: tchiotludo/akhq
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: "kafka0:29092"
+              schema-registry:
+                url: "http://schemaregistry0:8081"
+              connect:
+                - name: "connect"
+                  url: "http://connect:8083"
+    ports:
+      - 8001:8080
+    links:
       - kafka0
       - schemaregistry0
 
